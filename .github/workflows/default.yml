@@ -1,0 +1,116 @@
+name: .NET Build
+
+on:
+  workflow_call:
+    inputs:
+      projects:
+        description: Path to the project(s) file to build. Pass empty to have MSBuild use the default behavior. Supports globbing. Default is an empty string.
+        required: false
+        type: string
+        default: ''
+      configuration:
+        description: Defines the build configuration. Default is Debug.
+        required: false
+        type: string
+        default: 'Debug'
+      framework:
+        description: Compiles for a specific framework. The framework must be defined in the project file. Default is an empty string.
+        required: false
+        type: string
+        default: ''
+      include-preview:
+        description: When set to true, includes preview versions of .NET. Default is false.
+        required: false
+        type: boolean
+        default: false
+      strong-name-key-filename:
+        description: The filename of the strong name key. Default is an empty string.
+        required: false
+        type: string
+        default: ''
+      verbosity-level:
+        description: Sets the verbosity level of the command. Allowed values are quiet, minimal, normal, detailed, and diagnostic. Default is quiet.
+        required: false
+        type: string
+        default: 'quiet'
+      build-switches:
+        description: Provides a way to fully customize the build. Default is empty. See https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference?view=vs-2022#switches for more information.
+        required: false
+        type: string
+        default: ''
+      upload-build-artifact:
+        description: Upload the generated build artifact. Default is to upload.
+        required: false
+        type: boolean
+        default: true
+      upload-build-artifact-name:
+        description: The name of the uploaded build artifact. Default, when left empty, is 'format('{0}-{1}', inputs.framework, inputs.configuration)'.
+        required: false
+        type: string
+        default: ''
+      restore-cache-key:
+        description: When set, the current workspace will be overwritten with the content of the restore cache. Default is an empty string.
+        required: false
+        type: string
+        default: ''
+      timeout-minutes:
+        description: The maximum time in minutes to allow the job to run. Default is 15 minutes.
+        required: false
+        type: number
+        default: 15
+    outputs:
+      version:
+        description: The calculated version in SEMVER format.
+        value: ${{ jobs.build.outputs.version }}
+    secrets:
+      GCP_TOKEN:
+        required: false
+      GCP_BUCKETNAME:
+        required: false
+
+jobs:
+  build:
+    name: 🛠️ Build
+    runs-on: ubuntu-24.04
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    outputs:
+      version: ${{ steps.minver-calculate.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: codebeltnet/git-checkout@v1
+
+      - name: Install .NET
+        uses: codebeltnet/install-dotnet@v2
+        with:
+          includePreview: ${{ inputs.include-preview }}
+
+      - name: Install MinVer
+        uses: codebeltnet/dotnet-tool-install-minver@v1
+
+      - id: minver-calculate
+        name: Calculate Version
+        uses: codebeltnet/minver-calculate@v2
+
+      - if: ${{ inputs.strong-name-key-filename != '' }}
+        name: Download ${{ inputs.strong-name-key-filename }} file
+        uses: codebeltnet/gcp-download-file@v1
+        with:
+          serviceAccountKey: ${{ secrets.GCP_TOKEN }}
+          bucketName: ${{ secrets.GCP_BUCKETNAME }}
+          objectName: ${{ inputs.strong-name-key-filename }}
+
+      - if: ${{ inputs.restore-cache-key == '' }}
+        name: Restore Dependencies
+        uses: codebeltnet/dotnet-restore@v2
+
+      - name: Build for ${{ inputs.configuration }}
+        uses: codebeltnet/dotnet-build@v3
+        with:
+          projects: ${{ inputs.projects }}
+          configuration: ${{ inputs.configuration }}
+          framework: ${{ inputs.framework }}
+          level: ${{ inputs.verbosity-level }}
+          buildSwitches: ${{ inputs.build-switches }}
+          uploadBuildArtifact: ${{ inputs.upload-build-artifact }}
+          uploadBuildArtifactName: ${{ inputs.upload-build-artifact-name }}
+          restoreCacheKey: ${{ inputs.restore-cache-key }}
