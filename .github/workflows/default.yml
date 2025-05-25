@@ -102,6 +102,9 @@ jobs:
       - if: ${{ inputs.restore-cache-key == '' }}
         name: Restore Dependencies
         uses: codebeltnet/dotnet-restore@v2
+        with:
+          projects: ${{ inputs.projects }}
+          level: ${{ inputs.verbosity-level }}
 
       - name: Build for ${{ inputs.configuration }}
         uses: codebeltnet/dotnet-build@v3
