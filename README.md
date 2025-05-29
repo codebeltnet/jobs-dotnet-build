@@ -21,7 +21,9 @@ This repository contains reusable workflows for interacting with .NET CLI `build
   - [installs the MinVer for .NET tool](https://github.com/codebeltnet/dotnet-tool-install-minver),
   - [conditionally downloads strong name signing key](https://github.com/codebeltnet/gcp-download-file),
   - [conditionally restores the dependencies](https://github.com/codebeltnet/dotnet-restore),
-  - [builds the solution](https://github.com/codebeltnet/dotnet-build).
+  - conditionally restores cached content,
+  - [builds the solution](https://github.com/codebeltnet/dotnet-build),
+  - conditionally uploads workflow artifacts.
 
 ### Usage
 
@@ -29,7 +31,7 @@ To call this workflow in your GitHub repository, you can follow these steps:
 
 ```yaml
 build-call:
-    uses: codebeltnet/jobs-dotnet-build/.github/workflows/default.yml@v1
+    uses: codebeltnet/jobs-dotnet-build/.github/workflows/default.yml@v2
 ```
 
 #### Inputs
@@ -76,15 +78,22 @@ outputs:
   version: X.Y.Z # where X is MAJOR, Y is MINOR and Z is PATCH
 ```
 
-#### Example
+#### Examples
 
 ```yaml
+# Sign the assembly with a strong name key
 jobs:
   build:
     uses: codebeltnet/jobs-dotnet-build/.github/workflows/default@v1
     with:
       strong-name-key-filename: 'my-key.snk'
     secrets: inherit
+
+# Time-consuming builds for large projects
+- name: Build
+  uses: codebeltnet/dotnet-build@v4
+  with:
+    restore-cache-key: dotnet-restore-sha256
 ```
 
 ## Contributing to Reusable Workflows for .NET CLI Build
