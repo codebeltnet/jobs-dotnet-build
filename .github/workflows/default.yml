@@ -106,14 +106,34 @@ jobs:
           projects: ${{ inputs.projects }}
           level: ${{ inputs.verbosity-level }}
 
+      - if: inputs.restore-cache-key != ''
+        name: Restore
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ${{ github.workspace }}
+            !${{ github.workspace }}/.git
+            ~/.nuget/packages
+          key: ${{ inputs.restore-cache-key }}
+          restore-keys: |
+            dotnet-restore-
+          fail-on-cache-miss: true
+
       - name: Build for ${{ inputs.configuration }}
-        uses: codebeltnet/dotnet-build@v3
+        uses: codebeltnet/dotnet-build@v4
         with:
           projects: ${{ inputs.projects }}
           configuration: ${{ inputs.configuration }}
           framework: ${{ inputs.framework }}
-          level: ${{ inputs.verbosity-level }}
-          buildSwitches: ${{ inputs.build-switches }}
-          uploadBuildArtifact: ${{ inputs.upload-build-artifact }}
-          uploadBuildArtifactName: ${{ inputs.upload-build-artifact-name }}
-          restoreCacheKey: ${{ inputs.restore-cache-key }}
+          verbosity-level: ${{ inputs.verbosity-level }}
+          build-switches: ${{ inputs.build-switches }}
+
+      - if: always() && inputs.upload-build-artifact == 'true'
+        name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.upload-build-artifact-name != '' && inputs.upload-build-artifact-name || format('{0}-{1}', inputs.framework, inputs.configuration) }}
+          path: | 
+            ${{ github.workspace }}
+            !${{ github.workspace }}/.git
+          include-hidden-files: true
