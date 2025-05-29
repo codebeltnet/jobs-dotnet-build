@@ -99,7 +99,7 @@ jobs:
         uses: codebeltnet/dotnet-restore@v3
         with:
           projects: ${{ inputs.projects }}
-          level: ${{ inputs.verbosity-level }}
+          verbosity-level: ${{ inputs.verbosity-level }}
 
       - if: inputs.restore-cache-key != ''
         name: Restore Cache
