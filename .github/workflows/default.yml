@@ -107,7 +107,7 @@ jobs:
           level: ${{ inputs.verbosity-level }}
 
       - if: inputs.restore-cache-key != ''
-        name: Restore
+        name: Restore Cache
         uses: actions/cache/restore@v4
         with:
           path: |
@@ -128,7 +128,7 @@ jobs:
           verbosity-level: ${{ inputs.verbosity-level }}
           build-switches: ${{ inputs.build-switches }}
 
-      - if: always() && inputs.upload-build-artifact == 'true'
+      - if: always() && inputs.upload-build-artifact
         name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
