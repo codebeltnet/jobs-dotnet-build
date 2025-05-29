@@ -23,7 +23,7 @@ This repository contains reusable workflows for interacting with .NET CLI `build
   - [conditionally restores the dependencies](https://github.com/codebeltnet/dotnet-restore),
   - conditionally restores cached content,
   - [builds the solution](https://github.com/codebeltnet/dotnet-build),
-  - conditionally uploads workflow artifacts.
+  - uploads the built workspace as a workflow artifact.
 
 ### Usage
 

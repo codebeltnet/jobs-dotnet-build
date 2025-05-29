@@ -38,11 +38,6 @@ on:
         required: false
         type: string
         default: ''
-      upload-build-artifact:
-        description: Upload the generated build artifact. Default is to upload.
-        required: false
-        type: boolean
-        default: true
       upload-build-artifact-name:
         description: The name of the uploaded build artifact. Default, when left empty, is 'format('{0}-{1}', inputs.framework, inputs.configuration)'.
         required: false
@@ -128,8 +123,7 @@ jobs:
           verbosity-level: ${{ inputs.verbosity-level }}
           build-switches: ${{ inputs.build-switches }}
 
-      - if: always() && inputs.upload-build-artifact
-        name: Upload Build Artifacts
+      - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.upload-build-artifact-name != '' && inputs.upload-build-artifact-name || format('{0}-{1}', inputs.framework, inputs.configuration) }}
