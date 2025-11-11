@@ -75,7 +75,7 @@ jobs:
         uses: codebeltnet/git-checkout@v1
 
       - name: Install .NET
-        uses: codebeltnet/install-dotnet@v2
+        uses: codebeltnet/install-dotnet@v3
         with:
           includePreview: ${{ inputs.include-preview }}
 
