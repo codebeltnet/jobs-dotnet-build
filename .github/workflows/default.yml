@@ -53,6 +53,11 @@ on:
         required: false
         type: number
         default: 15
+      runs-on:
+        description: The type of machine to run the job on. Default is ubuntu-24.04.
+        required: false
+        type: string
+        default: 'ubuntu-24.04'
     outputs:
       version:
         description: The calculated version in SEMVER format.
@@ -66,7 +71,7 @@ on:
 jobs:
   build:
     name: 🛠️ Build
-    runs-on: ubuntu-24.04
+    runs-on: ${{ inputs.runs-on }}
     timeout-minutes: ${{ inputs.timeout-minutes }}
     outputs:
       version: ${{ steps.minver-calculate.outputs.version }}
