@@ -108,7 +108,7 @@ jobs:
 
       - if: inputs.restore-cache-key != ''
         name: Restore Cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: |
             ${{ github.workspace }}
@@ -129,7 +129,7 @@ jobs:
           build-switches: ${{ inputs.build-switches }}
 
       - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.upload-build-artifact-name != '' && inputs.upload-build-artifact-name || format('{0}-{1}', inputs.framework, inputs.configuration) }}
           path: | 
